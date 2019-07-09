@@ -41,8 +41,8 @@ public class Weather implements OperatorInterface {
         String location = config.getConfigValue("city", "Leipzig");
         String units = config.getConfigValue("units", "metric");
         httpclient = HttpClients.createDefault();
-        String apiKey = Helper.getEnv("WEATHER_API_KEY", "");
-        if(apiKey.length() == 0){
+        String apiKey = Helper.getEnv("WEATHER_API_KEY", "0");
+        if(apiKey.length() == 1){
             throw new IllegalArgumentException("You did not set the env WEATHER_API_KEY!");
         }
         httpGet = new HttpGet("http://api.openweathermap.org/data/2.5/weather?" +
