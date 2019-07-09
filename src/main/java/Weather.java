@@ -23,11 +23,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.infai.seits.sepl.operators.Config;
-import org.infai.seits.sepl.operators.Helper;
 import org.infai.seits.sepl.operators.Message;
 import org.infai.seits.sepl.operators.OperatorInterface;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 
@@ -36,15 +37,13 @@ public class Weather implements OperatorInterface {
     protected CloseableHttpClient httpclient;
     protected HttpGet httpGet;
 
-    public Weather(){
+    public Weather() throws IOException {
         Config config = new Config();
         String location = config.getConfigValue("city", "Leipzig");
         String units = config.getConfigValue("units", "metric");
         httpclient = HttpClients.createDefault();
-        String apiKey = Helper.getEnv("WEATHER_API_KEY", "0");
-        if(apiKey.length() == 1){
-            throw new IllegalArgumentException("You did not set the env WEATHER_API_KEY!");
-        }
+        BufferedReader br = new BufferedReader(new FileReader("api-key"));
+        String apiKey = br.readLine();
         httpGet = new HttpGet("http://api.openweathermap.org/data/2.5/weather?" +
                 "APPID=" + apiKey +
                 "&q=" + location +
