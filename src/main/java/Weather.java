@@ -61,7 +61,7 @@ public class Weather implements OperatorInterface {
             HttpEntity entity = response.getEntity();
             JSONObject json = new JSONObject(EntityUtils.toString(entity));
             message.output("web-temp", json.getJSONObject("main").getDouble("temp"));
-            message.output("web-humidity", json.getJSONObject("main").getDouble("temp"));
+            message.output("web-humidity", json.getJSONObject("main").getDouble("humidity"));
             message.output("device-temp", message.getInput("temp").getValue());
             message.output("device-humidity", message.getInput("humidity").getValue());
         } catch (IOException e) {
