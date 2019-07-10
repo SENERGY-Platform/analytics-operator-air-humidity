@@ -14,8 +14,8 @@ public class WeatherTest {
             Message m = messages.get(i);
             weather.config(m);
             weather.run(m);
-            Assert.assertTrue(m.getMessageString().contains("temp"));
-            Assert.assertTrue(m.getMessageString().contains("humidity"));
+            Assert.assertTrue(m.getMessageString().contains("device-temp"));
+            Assert.assertTrue(m.getMessageString().contains("device-humidity"));
             Assert.assertTrue(m.getMessageString().contains("web-temp"));
             Assert.assertTrue(m.getMessageString().contains("web-humidity"));
         }
