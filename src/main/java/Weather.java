@@ -60,10 +60,10 @@ public class Weather implements OperatorInterface {
             }
             HttpEntity entity = response.getEntity();
             JSONObject json = new JSONObject(EntityUtils.toString(entity));
-            message.output("web-temp", json.getJSONObject("main").getDouble("temp"));
-            message.output("web-humidity", json.getJSONObject("main").getDouble("humidity"));
-            message.output("device-temp", message.getInput("temp").getValue());
-            message.output("device-humidity", message.getInput("humidity").getValue());
+            message.output("webTemp", json.getJSONObject("main").getDouble("temp"));
+            message.output("webHumidity", json.getJSONObject("main").getDouble("humidity"));
+            message.output("deviceTemp", message.getInput("temp").getValue());
+            message.output("deviceHumidity", message.getInput("humidity").getValue());
         } catch (IOException e) {
             System.err.println("Could no get weather data from openweathermap API!");
             System.err.println("Skipping this message...");

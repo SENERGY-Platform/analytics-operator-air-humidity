@@ -9,10 +9,10 @@ Takes temperature and humidity readings from an inside sensor and adds outside d
 
 ## Outputs
 
-* device-temp (float): As read from input
-* device-humidity (float): As read from input
-* web-temp (float): Current temperature of specified location
-* web-humidity (float): Current humidity (rel.) of specified location
+* deviceTemp (float): As read from input
+* deviceHumidity (float): As read from input
+* webTemp (float): Current temperature of specified location
+* webHumidity (float): Current humidity (rel.) of specified location
 
 ## Configs
 
