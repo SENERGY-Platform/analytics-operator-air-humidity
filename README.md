@@ -1,6 +1,7 @@
 # operator-weather
 
 Takes temperature and humidity readings from an inside sensor and adds outside data from openweathermap.
+Calculates the theoretic inside humidity after full air exchange for now and a future date.
 
 ## Inputs
 
@@ -9,10 +10,11 @@ Takes temperature and humidity readings from an inside sensor and adds outside d
 
 ## Outputs
 
-* deviceTemp (float): As read from input
-* deviceHumidity (float): As read from input
-* webTemp (float): Current temperature of specified location
-* webHumidity (float): Current humidity (rel.) of specified location
+* humidityAfterAir (float): Theoretic rel. humidity of the air after complete change of air in the room and
+reheating/cooling the air to inside temperature
+* humidityAfterAirTrend (float): Same as humidityAfterAir, but calculated based on a weather forecast.
+* trendDate (string): Timestamp of the humidityAfterAirTrend
+* insideHumidity (float): As read
 
 ## Configs
 

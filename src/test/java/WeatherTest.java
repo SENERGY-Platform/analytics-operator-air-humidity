@@ -14,10 +14,11 @@ public class WeatherTest {
             Message m = messages.get(i);
             weather.config(m);
             weather.run(m);
-            Assert.assertTrue(m.getMessageString().contains("deviceTemp"));
-            Assert.assertTrue(m.getMessageString().contains("deviceHumidity"));
-            Assert.assertTrue(m.getMessageString().contains("webTemp"));
-            Assert.assertTrue(m.getMessageString().contains("webHumidity"));
+            System.out.println(m.getMessageString());
+            Assert.assertTrue(m.getMessageString().contains("humidityAfterAir"));
+            Assert.assertTrue(m.getMessageString().contains("humidityAfterAirTrend"));
+            Assert.assertTrue(m.getMessageString().contains("trendDate"));
+            Assert.assertTrue(m.getMessageString().contains("insideHumidity"));
         }
 
     }
