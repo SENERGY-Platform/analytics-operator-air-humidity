@@ -33,7 +33,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 
-public class Weather implements OperatorInterface {
+public class AirHumidity implements OperatorInterface {
 
     protected CloseableHttpClient httpclient;
     protected HttpGet httpGetCurrentWeather;
@@ -41,7 +41,7 @@ public class Weather implements OperatorInterface {
     protected int numForecasts = 1;
     protected String units;
 
-    public Weather() throws IOException {
+    public AirHumidity() throws IOException {
         Config config = new Config();
         String location = config.getConfigValue("city", "Leipzig");
         units = config.getConfigValue("units", "metric");

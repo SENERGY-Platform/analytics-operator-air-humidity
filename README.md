@@ -1,4 +1,4 @@
-# operator-weather
+# operator-air-humidity
 
 Takes temperature and humidity readings from an inside sensor and adds outside data from openweathermap.
 Calculates the theoretic inside humidity after full air exchange for now and a future date.

@@ -4,16 +4,16 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class WeatherTest {
+public class AirHumidityTest {
 
     @Test
     public void run() throws Exception{
-        Weather weather = new Weather();
+        AirHumidity airHumidity = new AirHumidity();
         List<Message> messages = TestMessageProvider.getTestMesssagesSet();
         for (int i = 0; i < messages.size(); i++) {
             Message m = messages.get(i);
-            weather.config(m);
-            weather.run(m);
+            airHumidity.config(m);
+            airHumidity.run(m);
             System.out.println(m.getMessageString());
             Assert.assertTrue(m.getMessageString().contains("humidityAfterAir"));
             Assert.assertTrue(m.getMessageString().contains("humidityAfterAirTrend"));

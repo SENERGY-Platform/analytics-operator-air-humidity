@@ -22,6 +22,6 @@ public class Operator {
 
     public static void main(String[] args) throws IOException {
         Stream stream  = new Stream();
-        stream.start(new Weather());
+        stream.start(new AirHumidity());
     }
 }
