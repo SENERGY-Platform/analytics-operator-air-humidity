@@ -99,8 +99,6 @@ public class AirHumidity implements OperatorInterface {
             final double trendTemp = list.getJSONObject(0).getJSONObject("main").getDouble("temp");
             String trendDate = list.getJSONObject(0).getString("dt_txt");
 
-            System.out.println("Forecast for " + trendDate);
-
             final double currentAfterAirHumidity = HumidityCalculator.calculateHumidity(insideTemp,
                     currentWeatherTemp, currentWeatherHumidity, !units.equalsIgnoreCase("metric"));
 
