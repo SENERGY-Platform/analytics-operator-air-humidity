@@ -15,13 +15,6 @@
  */
 
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.infai.seits.sepl.operators.Config;
 import org.infai.seits.sepl.operators.Message;
 import org.infai.seits.sepl.operators.OperatorInterface;
@@ -35,9 +28,7 @@ import java.io.IOException;
 
 public class AirHumidity implements OperatorInterface {
 
-    protected CloseableHttpClient httpclient;
-    protected HttpGet httpGetCurrentWeather;
-    protected HttpGet httpGetForecast;
+    protected WeatherCatcher weatherCatcher;
     protected int numForecasts = 1;
     protected String units;
 
@@ -45,89 +36,51 @@ public class AirHumidity implements OperatorInterface {
         Config config = new Config();
         String location = config.getConfigValue("city", "Leipzig");
         units = config.getConfigValue("units", "metric");
-        httpclient = HttpClients.createDefault();
         BufferedReader br = new BufferedReader(new FileReader("api-key"));
         String apiKey = br.readLine();
-        httpGetCurrentWeather = new HttpGet("http://api.openweathermap.org/data/2.5/weather?" +
-                "APPID=" + apiKey +
-                "&q=" + location +
-                "&units=" + units
-        );
-        httpGetForecast = new HttpGet("http://api.openweathermap.org/data/2.5/forecast?" +
-                "APPID=" + apiKey +
-                "&q=" + location +
-                "&units=" + units +
-                "&cnt=" + numForecasts
-        );
+        long cacheTimeoutMillis = 1000 * 60 * 10; //10min, openweathermap update interval
+        weatherCatcher = new WeatherCatcher(apiKey, location, units, numForecasts, cacheTimeoutMillis);
     }
 
     @Override
     public void run(Message message) {
-        CloseableHttpResponse currentWeatherResponse = null;
-        CloseableHttpResponse forecastResponse = null;
+        JSONObject currentWeatherJson;
+        JSONObject forecastJson;
         try {
-            //get current weather
-            currentWeatherResponse = httpclient.execute(httpGetCurrentWeather);
-            if (currentWeatherResponse.getStatusLine().getStatusCode() != 200) {
-                throw new HttpResponseException(currentWeatherResponse.getStatusLine().getStatusCode(),
-                        currentWeatherResponse.getStatusLine().getReasonPhrase());
-            }
-            HttpEntity currentWeatherEntity = currentWeatherResponse.getEntity();
-            JSONObject currentWeatherJson = new JSONObject(EntityUtils.toString(currentWeatherEntity));
-
-            //Get forecast
-            forecastResponse = httpclient.execute(httpGetForecast);
-            if (forecastResponse.getStatusLine().getStatusCode() != 200) {
-                throw new HttpResponseException(currentWeatherResponse.getStatusLine().getStatusCode(),
-                        currentWeatherResponse.getStatusLine().getReasonPhrase());
-            }
-            HttpEntity forecastEntity = forecastResponse.getEntity();
-            JSONObject forecastJson = new JSONObject(EntityUtils.toString(forecastEntity));
-
-            //Get inside values
-            final Double insideTemp = message.getInput("temp").getValue();
-            final Double insideHumidity = message.getInput("humidity").getValue();
-
-            //Extract current weather data
-            final double currentWeatherTemp = currentWeatherJson.getJSONObject("main").getDouble("temp");
-            final double currentWeatherHumidity = currentWeatherJson.getJSONObject("main").getDouble("humidity");
-
-            //Extract forecast weather data
-            JSONArray list = forecastJson.getJSONArray("list");
-
-            final double trendHumidity = list.getJSONObject(0).getJSONObject("main").getDouble("humidity");
-            final double trendTemp = list.getJSONObject(0).getJSONObject("main").getDouble("temp");
-            String trendDate = list.getJSONObject(0).getString("dt_txt");
-
-            final double currentAfterAirHumidity = HumidityCalculator.calculateHumidity(insideTemp,
-                    currentWeatherTemp, currentWeatherHumidity, !units.equalsIgnoreCase("metric"));
-
-            final double trendAfterAirHumidity = HumidityCalculator.calculateHumidity(insideTemp,
-                    trendTemp, trendHumidity, !units.equalsIgnoreCase("metric"));
-
-            message.output("humidityAfterAir", currentAfterAirHumidity);
-            message.output("humidityAfterAirTrend", trendAfterAirHumidity);
-            message.output("trendDate", trendDate);
-            message.output("insideHumidity", insideHumidity);
-
-
+            currentWeatherJson = weatherCatcher.getCurrentWeather();
+            forecastJson = weatherCatcher.getForecast();
         } catch (IOException e) {
             System.err.println("Could no get weather data from openweathermap API!");
-            System.err.println("Skipping this message...");
-            System.err.println(e.getMessage());
+            System.err.println("Skipping this message...\n");
             e.printStackTrace();
-        } finally {
-            try {
-                currentWeatherResponse.close();
-            } catch (IOException e) {
-                System.err.println("Could not close HTTP request of current weather");
-            }
-            try {
-                forecastResponse.close();
-            } catch (IOException e) {
-                System.err.println("Could not close HTTP request of forecast");
-            }
+            return;
         }
+
+        //Get inside values
+        final Double insideTemp = message.getInput("temp").getValue();
+        final Double insideHumidity = message.getInput("humidity").getValue();
+
+        //Extract current weather data
+        final double currentWeatherTemp = currentWeatherJson.getJSONObject("main").getDouble("temp");
+        final double currentWeatherHumidity = currentWeatherJson.getJSONObject("main").getDouble("humidity");
+
+        //Extract forecast weather data
+        JSONArray list = forecastJson.getJSONArray("list");
+
+        final double trendHumidity = list.getJSONObject(0).getJSONObject("main").getDouble("humidity");
+        final double trendTemp = list.getJSONObject(0).getJSONObject("main").getDouble("temp");
+        String trendDate = list.getJSONObject(0).getString("dt_txt");
+
+        final double currentAfterAirHumidity = HumidityCalculator.calculateHumidity(insideTemp,
+                currentWeatherTemp, currentWeatherHumidity, !units.equalsIgnoreCase("metric"));
+
+        final double trendAfterAirHumidity = HumidityCalculator.calculateHumidity(insideTemp,
+                trendTemp, trendHumidity, !units.equalsIgnoreCase("metric"));
+
+        message.output("humidityAfterAir", currentAfterAirHumidity);
+        message.output("humidityAfterAirTrend", trendAfterAirHumidity);
+        message.output("trendDate", trendDate);
+        message.output("insideHumidity", insideHumidity);
     }
 
     @Override
